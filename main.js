@@ -220,4 +220,4 @@ client.on('message', message =>{
     }
 });
 
-client.login('ODUzNDI5OTc5NTI2MDcwMjgy.YMVQmw.sRznyOIQi7Vm-2oSZbioCa3qlS0');
+client.login('token'); //please put your bots token here if you want to use this
