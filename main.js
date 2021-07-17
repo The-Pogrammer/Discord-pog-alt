@@ -1,11 +1,15 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
+var running = false;
 Array.prototype.insert = function ( index, item ) {
     this.splice( index, 0, item );
 };
 var playertab = [];
 newline = `
 `;
+client.on("ready", function() {
+    client.user.setActivity(":!commands")
+  });
 class player {
     constructor(token, monfight, monhealth, exp, Gold, curract, attack) {
         this.token = token;
@@ -64,14 +68,237 @@ client.on('message', message =>{
         message.channel.send("no u");
     }
     if (message.content.startsWith(":!")) {
-        if (message.content.startsWith(":!d")) {
-            if (message.author.id == "697959912302444614") {
-                if (message.content == ":!dspare") {
+        console.log(running);
+        if (!running) {
+            running = true;
+            var messagecurr = message;
+            if (messagecurr.content.startsWith(":!d")) {
+                if (messagecurr.author.id == "697959912302444614" || "365637054249566208") {
+                    if (messagecurr.content.startsWith(":!dreset")) {
+                        var intable = false;
+                        var position = 0;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == messagecurr.author.id) {
+                                intable = true;
+                                position = i;
+                            }
+                        }
+                        var arr = messagecurr.content.split(" ");
+                        if (arr[1] == undefined) {
+                            playertab[position].exp = 0;
+                            playertab[position].Gold = 0;
+                        } else {
+                            arr[1] = findsubstr(arr[1], 3, arr[1].length - 4)
+                            var position = -1;
+                            for (i = 0; i < playertab.length; i++) {
+                                if (playertab[i].token == arr[1]) {
+                                    position = i;
+                                }
+                            }
+                            if (position > -1) {
+                                playertab[position].exp = 0;
+                                playertab[position].Gold = 0;
+                            } else {
+                                messagecurr.mhannel.send("That user does not exist.");
+                            }
+                        }
+                    }
+                    if (messagecurr.content == ":!dspare") {
+                        var intable = false;
+                        var position = 0;
+                        var hasmon = true;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == messagecurr.author.id) {
+                                intable = true;
+                                position = i;
+                                if (playertab[i].monfight == "false") {
+                                    hasmon = false;
+                                }
+                            }
+                        }
+                        if (intable && hasmon) {
+                            messagecurr.channel.send(new Discord.MessageEmbed()
+                                .setDescription(playertab[position].monfight.name + " was spared! " + newline + "You Gained 0 EXP and " + playertab[position].monfight.rewardg + " Gold")
+                            );
+                            playertab[position].Gold += playertab[position].monfight.rewardg;
+                            playertab[position].monfight = "false";
+                        } else {
+                            messagecurr.channel.send("you have no fight, please use `:!enc`.");
+                        }
+                    }
+                    if (messagecurr.content == ":!dfight") {
+                        var intable = false;
+                        var position = 0;
+                        var hasmon = true;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == messagecurr.author.id) {
+                                intable = true;
+                                position = i;
+                                if (playertab[i].monfight == "false") {
+                                    hasmon = false;
+                                }
+                            }
+                        }
+                        if (intable && hasmon) {
+                            newitem = playertab[position].monfight;
+                            playertab[position].monhealth = 0;
+                            if (playertab[position].monhealth <= 0) {
+                                if (playertab[position].Gold < 0 || isNaN(playertab[position].Gold) || playertab[position].Gold == undefined) {
+                                    playertab[position].Gold = 0;
+                                }
+                                if (playertab[position].exp < 0 || isNaN(playertab[position].exp) || playertab[position].exp == undefined) {
+                                    playertab[position].exp = 0;
+                                }
+                                if (playertab[position].exp > 99999) {
+                                    playertab[position].exp = 99999
+                                }
+                                if (playertab[position].Gold > 1000000000000000) {
+                                    playertab[position].Gold = 1000000000000000
+                                }
+                                if (playertab[position].exp >= 100) {
+                                    var attackadd = 0;
+                                    while (playertab[position].exp >= 100) {
+                                        playertab[position].exp -= 100;
+                                        attackadd += 5
+                                    }
+                                    playertab[position].attack += attackadd;
+                                    messagecurr.channel.send(new Discord.MessageEmbed()
+                                        .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!" + newline + ":heart: Love up! ATK +" + attackadd)
+                                    );
+                                } else {
+                                    messagecurr.channel.send(new Discord.MessageEmbed()
+                                        .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!")
+                                    );
+                                }
+                                playertab[position].exp += playertab[position].monfight.rewarde;
+                                playertab[position].Gold += playertab[position].monfight.rewardg;
+                                playertab[position].monfight = "false";
+                            } else {
+                                messagecurr.channel.send(new Discord.MessageEmbed()
+                                    .attachFiles(newitem.gif)
+                                    .setDescription(playertab[position].monhealth + "/" + newitem.health)
+                                );
+                            }
+                        } else {
+                            messagecurr.channel.send("you have no fight, please use `:!enc`.");
+                        }
+
+                    }
+                    if (messagecurr.content.startsWith(":!dexp")) {
+                        var position = 0;
+                        var intable = false;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == messagecurr.author.id) {
+                                position = i;
+                                intable = true;
+                            }
+                        }
+                        var arr = messagecurr.content.split(" ");
+                        console.log(arr);
+                        if (arr[3] == undefined) {
+                            if (isNaN(Number(arr[1]))) {
+                                messagecurr.channel.send("thats not a real value");
+                            } else {
+                                if (intable) {
+                                    playertab[position].exp += Number(arr[1]);
+                                } else {
+                                    messagecurr.channel.send("Your not on the list");
+                                }
+                            }
+                        } else {
+                            arr[2] = findsubstr(arr[2], 2, arr[2].length - 3)
+                            var position = -1;
+                            for (i = 0; i < playertab.length; i++) {
+                                if (playertab[i].token == arr[2]) {
+                                    position = i;
+                                }
+                            }
+                            if (position > -1) {
+                                console.log(Number(arr[1]))
+                                if (isNaN(Number(arr[1]))) {
+                                    messagecurr.channel.send("thats not a real value");
+                                } else {
+                                    var position = -1;
+                                    for (i = 0; i < playertab.length; i++) {
+                                        if (playertab[i].token == arr[3]) {
+                                            position = i;
+                                        }
+                                    }
+                                    if (position > -1) {
+                                        playertab[position].exp += Number(arr[1]);
+                                    } else {
+                                        messagecurr.channel.send("They're not on the list");
+                                    }
+                                }
+                            } else {
+                                messagecurr.channel.send("Either that user isnt in the list or they dont exist at all, please try again.");
+                            }
+                        }
+                    }
+                    if (messagecurr.content.startsWith(":!dgold")) {
+                        var position = 0;
+                        var intable = false;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == messagecurr.author.id) {
+                                position = i;
+                                intable = true;
+                            }
+                        }
+                        var arr = messagecurr.content.split(" ");
+                        console.log(arr);
+                        if (arr[3] == undefined) {
+                            if (isNaN(Number(arr[1]))) {
+                                messagecurr.channel.send("thats not a real value");
+                            } else {
+                                if (intable) {
+                                    playertab[position].Gold += Number(arr[1]);
+                                } else {
+                                    messagecurr.channel.send("Your not on the list");
+                                }
+                            }
+                        } else {
+                            arr[2] = findsubstr(arr[2], 2, arr[2].length - 3)
+                            var position = -1;
+                            for (i = 0; i < playertab.length; i++) {
+                                if (playertab[i].token == arr[2]) {
+                                    position = i;
+                                }
+                            }
+                            if (position > -1) {
+                                console.log(Number(arr[1]))
+                                if (isNaN(Number(arr[1]))) {
+                                    messagecurr.channel.send("thats not a real value");
+                                } else {
+                                    var position = -1;
+                                    for (i = 0; i < playertab.length; i++) {
+                                        if (playertab[i].token == arr[3]) {
+                                            position = i;
+                                        }
+                                    }
+                                    if (position > -1) {
+                                        playertab[position].Gold += Number(arr[1]);
+                                    } else {
+                                        messagecurr.channel.send("They're not on the list");
+                                    }
+                                }
+                            } else {
+                                messagecurr.channel.send("Either that user isnt in the list or they dont exist at all, please try again.");
+                            }
+                        }
+                    }
+                    if (messagecurr.content == ":!dcommands") {
+                        messagecurr.channel.send("`:!dfight for instant monster killing." + newline + ":!dspare for sparing monsters without acting." + newline + ":!dexp <amount> <person> to add exp to other people or yourself." + newline + ":!dgold <amount> <person> to add gold to other people or yourself.`");
+                    }
+                } else {
+                    messagecurr.channel.send("You don't have debug perms.");
+                }
+            } else {
+                if (messagecurr.content == ":!act") {
                     var intable = false;
                     var position = 0;
                     var hasmon = true;
                     for (i = 0; i < playertab.length; i++) {
-                        if (playertab[i].token == message.author.id) {
+                        if (playertab[i].token == messagecurr.author.id) {
                             intable = true;
                             position = i;
                             if (playertab[i].monfight == "false") {
@@ -80,21 +307,123 @@ client.on('message', message =>{
                         }
                     }
                     if (intable) {
-                        message.channel.send(new Discord.MessageEmbed()
-                            .setDescription(playertab[position].monfight.name + " was spared! " + newline + "You Gained 0 EXP and " + playertab[position].monfight.rewardg + " Gold")
-                        );
-                        playertab[position].Gold += playertab[position].monfight.rewardg;
-                        playertab[position].monfight = "false";
+                        if (hasmon) {
+                            if(playertab[position].curract != 0) {
+                                messagecurr.channel.send(new Discord.MessageEmbed()
+                                    .setDescription("*" + playertab[position].monfight.actreplys[playertab[position].curract])
+                                );
+                                playertab[position].curract -= 1;
+                            } else {
+                                messagecurr.channel.send(new Discord.MessageEmbed()
+                                    .setDescription("*" + playertab[position].monfight.actreplys[0])
+                                );
+                            }
+                        } else {
+                            messagecurr.channel.send("you have no encounter, please use `:!enc`.");
+                        }
                     } else {
-                        message.channel.send("you have no fight, please use `:!enc`.");
+                        messagecurr.channel.send("you have no fight, please use `:!enc`.");
                     }
                 }
-                if (message.content == ":!dfight") {
+                if (messagecurr.content == ":!commands") {
+                    messagecurr.channel.send("`:!enc for getting monster encounters." + newline + ":!spare for sparing monsters." + newline + ":!check for seeing your current fight if it gets buried." + newline + ":!stats <person> for seeing your or others stats." + newline + ":!fight for fighting monsters like a monster." + newline + ":!act for acting so you can spare.`");
+                }
+                console.log(playertab);
+                if (messagecurr.content.startsWith(":!stats")) {
+                    var arr = messagecurr.content.split(" ");
+                    if (arr[1] == undefined) {
+                        var intable = false;
+                        var position = -1;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == messagecurr.author.id) {
+                                intable = true;
+                                position = i;
+                            }
+                        }
+                        if (intable) {
+                            if (playertab[position].Gold < 0 || isNaN(playertab[position].Gold) || playertab[position].Gold == undefined) {
+                                playertab[position].Gold = 0;
+                            }
+                            if (playertab[position].exp < 0 || isNaN(playertab[position].exp) || playertab[position].exp == undefined) {
+                                playertab[position].exp = 0;
+                            }
+                            if (playertab[position].exp > 99999) {
+                                playertab[position].exp = 99999
+                            }
+                            if (playertab[position].Gold > 1000000000000000) {
+                                playertab[position].Gold = 1000000000000000
+                            }
+                            messagecurr.channel.send(new Discord.MessageEmbed()
+                                .setDescription("You have " + playertab[position].exp + " EXP and " + playertab[position].Gold + " Gold.")
+                            );
+                        } else {
+                            playertab.insert(0, new player(messagecurr.author.id, "false", 0, 0, 0, 0, 10));
+                            messagecurr.channel.send(new Discord.MessageEmbed()
+                                .setDescription("You have 0 EXP and 0 Gold.")
+                            );
+                        }
+                    } else {
+                        arr[1] = findsubstr(arr[1], 3, arr[1].length - 4)
+                        var position = -1;
+                        for (i = 0; i < playertab.length; i++) {
+                            if (playertab[i].token == arr[1]) {
+                                position = i;
+                            }
+                        }
+                        if (position > -1) {
+                            if (playertab[position].Gold < 0 || isNaN(playertab[position].Gold) || playertab[position].Gold == undefined) {
+                                playertab[position].Gold = 0;
+                            }
+                            if (playertab[position].exp < 0 || isNaN(playertab[position].exp) || playertab[position].exp == undefined) {
+                                playertab[position].exp = 0;
+                            }
+                            if (playertab[position].exp > 99999) {
+                                playertab[position].exp = 99999
+                            }
+                            if (playertab[position].Gold > 1000000000000000) {
+                                playertab[position].Gold = 1000000000000000
+                            }
+                            messagecurr.channel.send(new Discord.MessageEmbed()
+                                .setDescription("<@" + arr[1] + "> has " + playertab[position].exp + " EXP and " + playertab[position].Gold + " Gold.")
+                            );
+                        } else {
+                            messagecurr.channel.send("That user doesn't have any stats because they haven't done :!stats or :!enc");
+                        }
+                    }
+                }
+                if (messagecurr.content == ":!spare") {
                     var intable = false;
                     var position = 0;
                     var hasmon = true;
                     for (i = 0; i < playertab.length; i++) {
-                        if (playertab[i].token == message.author.id) {
+                        if (playertab[i].token == messagecurr.author.id) {
+                            intable = true;
+                            position = i;
+                            if (playertab[i].monfight == "false") {
+                                hasmon = false;
+                            }
+                        }
+                    }
+                    if (intable && hasmon) {
+                        if (playertab[position].curract == 0) {
+                            messagecurr.channel.send(new Discord.MessageEmbed()
+                                .setDescription(playertab[position].monfight.name + " was spared! " + newline + "You Gained 0 EXP and " + playertab[position].monfight.rewardg + " Gold")
+                            );
+                            playertab[position].Gold += playertab[position].monfight.rewardg;
+                            playertab[position].monfight = "false";
+                        } else {
+                            messagecurr.channel.send(playertab[position].monfight.name + " doesn't want to spare you!");
+                        }
+                    } else {
+                        messagecurr.channel.send("you have no fight, please use `:!enc`.");
+                    }
+                }
+                if (messagecurr.content == ":!fight") {
+                    var intable = false;
+                    var position = 0;
+                    var hasmon = true;
+                    for (i = 0; i < playertab.length; i++) {
+                        if (playertab[i].token == messagecurr.author.id) {
                             intable = true;
                             position = i;
                             if (playertab[i].monfight == "false") {
@@ -104,37 +433,54 @@ client.on('message', message =>{
                     }
                     if (intable && hasmon) {
                         newitem = playertab[position].monfight;
-                        playertab[position].monhealth = 0;
+                        playertab[position].monhealth -= playertab[position].attack + extra();
                         if (playertab[position].monhealth <= 0) {
-                            message.channel.send(new Discord.MessageEmbed()
-                                .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!")
-                            );
+                            if (playertab[position].Gold < 0 || isNaN(playertab[position].Gold) || playertab[position].Gold == undefined) {
+                                playertab[position].Gold = 0;
+                            }
+                            if (playertab[position].exp < 0 || isNaN(playertab[position].exp) || playertab[position].exp == undefined) {
+                                playertab[position].exp = 0;
+                            }
+                            if (playertab[position].exp > 99999) {
+                                playertab[position].exp = 99999
+                            }
+                            if (playertab[position].Gold > 1000000000000000) {
+                                playertab[position].Gold = 1000000000000000
+                            }
+                            if (playertab[position].exp >= 100) {
+                                var attackadd = 0;
+                                while (playertab[position].exp >= 100) {
+                                    playertab[position].exp -= 100;
+                                    attackadd += 5
+                                }
+                                playertab[position].attack += attackadd;
+                                messagecurr.channel.send(new Discord.MessageEmbed()
+                                    .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!" + newline + ":heart: Love up! ATK +" + attackadd)
+                                );
+                            } else {
+                                messagecurr.channel.send(new Discord.MessageEmbed()
+                                    .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!")
+                                );
+                            }
                             playertab[position].exp += playertab[position].monfight.rewarde;
                             playertab[position].Gold += playertab[position].monfight.rewardg;
                             playertab[position].monfight = "false";
                         } else {
-                            message.channel.send(new Discord.MessageEmbed()
+                            messagecurr.channel.send(new Discord.MessageEmbed()
                                 .attachFiles(newitem.gif)
                                 .setDescription(playertab[position].monhealth + "/" + newitem.health)
                             );
                         }
                     } else {
-                        message.channel.send("you have no fight, please use `:!enc`.");
-                    }
-                    if (playertab[position].exp >= 100) {
-                        playertab[position].exp -= 100;
-                        playertab[position].attack += 5;
-                        message.channel.send(new Discord.MessageEmbed()
-                            .setDescription("Love up! ATK +5")
-                        );
+                        messagecurr.channel.send("you have no fight, please use `:!enc`.");
                     }
                 }
-                if (message.content.startsWith(":!dexp")) {
+                if (messagecurr.content == ":!check") {
                     var intable = false;
                     var position = 0;
                     var hasmon = true;
                     for (i = 0; i < playertab.length; i++) {
-                        if (playertab[i].token == message.author.id) {
+                        if (playertab[i].token == messagecurr.author.id) {
                             intable = true;
                             position = i;
                             if (playertab[i].monfight == "false") {
@@ -142,207 +488,53 @@ client.on('message', message =>{
                             }
                         }
                     }
-                    if (intable) {
-                        message = findsubstr(message.content, 7, message.content.length-7);
-                        console.log(message);
-                        playertab[position].exp += Number(message);
-                    } else {
-                        playertab.insert(0, new player(message.author.id, "false", 1, 0, 0, 0, 10));
-                        message = findsubstr(message.content, 7, message.content.length-7);
-                        console.log(message);
-                        playertab[0].exp += Number(message);
-                    }
-                }
-                if (message.content == ":!dcommands") {
-                    message.channel.send("`:!dfight for instant monster killing." + newline + ":!dspare for sparing monsters without acting." + newline + ":!dexp <amount> to add exp to yourself.`");
-                }
-            } else {
-                message.channel.send("You don't have debug perms.");
-            }
-        } else {
-            if (message.content == ":!act") {
-                var intable = false;
-                var position = 0;
-                var hasmon = true;
-                for (i = 0; i < playertab.length; i++) {
-                    if (playertab[i].token == message.author.id) {
-                        intable = true;
-                        position = i;
-                        if (playertab[i].monfight == "false") {
-                            hasmon = false;
-                        }
-                    }
-                }
-                if (intable) {
-                    if (hasmon) {
-                        if(playertab[position].curract != 0) {
-                            message.channel.send(new Discord.MessageEmbed()
-                                .setDescription("*" + playertab[position].monfight.actreplys[playertab[position].curract])
-                            );
-                            playertab[position].curract -= 1;
-                        } else {
-                            message.channel.send(new Discord.MessageEmbed()
-                                .setDescription("*" + playertab[position].monfight.actreplys[0])
-                            );
-                        }
-                    } else {
-                        message.channel.send("you have no encounter, please use `:!enc`.");
-                    }
-                } else {
-                    message.channel.send("you have no fight, please use `:!enc`.");
-                }
-            }
-            if (message.content == ":!commands") {
-                message.channel.send("`:!enc for getting monster encounters." + newline + ":!spare for sparing monsters." + newline + ":!check for seeing your current fight if it gets buried." + newline + ":!stats for seeing your stats." + newline + ":!fight for fighting monsters like a monster." + newline + ":!act for acting so you can spare.`");
-            }
-            console.log(playertab);
-            if (message.content == ":!stats") {
-                var intable = false;
-                var position = 0;
-                var hasmon = true;
-                for (i = 0; i < playertab.length; i++) {
-                    if (playertab[i].token == message.author.id) {
-                        intable = true;
-                        position = i;
-                        if (playertab[i].monfight == "false") {
-                            hasmon = false;
-                        }
-                    }
-                }
-                if (intable) {
-                    message.channel.send(new Discord.MessageEmbed()
-                        .setDescription("You have " + playertab[position].exp + " EXP and " + playertab[position].Gold + " Gold.")
-                    );
-                } else {
-                    playertab.splice(playertab[i], 1, new player(message.author.id, "false", 0, 0, 0));
-                    message.channel.send(new Discord.MessageEmbed()
-                        .setDescription("You have 0 EXP and 0 Gold.")
-                    );
-                }
-            }
-            if (message.content == ":!spare") {
-                var intable = false;
-                var position = 0;
-                var hasmon = true;
-                for (i = 0; i < playertab.length; i++) {
-                    if (playertab[i].token == message.author.id) {
-                        intable = true;
-                        position = i;
-                        if (playertab[i].monfight == "false") {
-                            hasmon = false;
-                        }
-                    }
-                }
-                if (intable) {
-                    if (playertab[position].curract == 0) {
-                        message.channel.send(new Discord.MessageEmbed()
-                            .setDescription(playertab[position].monfight.name + " was spared! " + newline + "You Gained 0 EXP and " + playertab[position].monfight.rewardg + " Gold")
-                        );
-                        playertab[position].Gold += playertab[position].monfight.rewardg;
-                        playertab[position].monfight = "false";
-                    } else {
-                        message.channel.send(playertab[position].monfight.name + " doesn't want to spare you!");
-                    }
-                } else {
-                    message.channel.send("you have no fight, please use `:!enc`.");
-                }
-            }
-            if (message.content == ":!fight") {
-                var intable = false;
-                var position = 0;
-                var hasmon = true;
-                for (i = 0; i < playertab.length; i++) {
-                    if (playertab[i].token == message.author.id) {
-                        intable = true;
-                        position = i;
-                        if (playertab[i].monfight == "false") {
-                            hasmon = false;
-                        }
-                    }
-                }
-                if (intable && hasmon) {
-                    newitem = playertab[position].monfight;
-                    playertab[position].monhealth -= playertab[position].attack + extra();
-                    if (playertab[position].monhealth <= 0) {
-                        message.channel.send(new Discord.MessageEmbed()
-                            .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!")
-                        );
-                        playertab[position].exp += playertab[position].monfight.rewarde;
-                        playertab[position].Gold += playertab[position].monfight.rewardg;
-                        playertab[position].monfight = "false";
-                    } else {
-                        message.channel.send(new Discord.MessageEmbed()
+                    if (intable && hasmon) {
+                        newitem = playertab[position].monfight;
+                        messagecurr.channel.send(new Discord.MessageEmbed()
                             .attachFiles(newitem.gif)
-                            .setDescription(playertab[position].monhealth + "/" + newitem.health)
+                            .setDescription("The fight continues! " + newitem.name + " is at " + playertab[position].monhealth + "/" + newitem.health)
                         );
+                    } else {
+                        messagecurr.channel.send("you have no encounter, please use `:!enc`.");
                     }
-                } else {
-                    message.channel.send("you have no fight, please use `:!enc`.");
                 }
-                while (playertab[position].exp >= 100) {
-                    playertab[position].exp -= 100;
-                    playertab[position].attack += 5;
-                    message.channel.send(new Discord.MessageEmbed()
-                        .setDescription("Love up! ATK +5")
-                    );
-                }
-            }
-            if (message.content == ":!check") {
-                var intable = false;
-                var position = 0;
-                var hasmon = true;
-                for (i = 0; i < playertab.length; i++) {
-                    if (playertab[i].token == message.author.id) {
-                        intable = true;
-                        position = i;
-                        if (playertab[i].monfight == "false") {
-                            hasmon = false;
+                if (messagecurr.content == ":!enc") {
+                    var sintable = false;
+                    var sposition = -1;
+                    var shasmon = true;
+                    for (i = 0; i < playertab.length; i++) {
+                        if (playertab[i].token == messagecurr.author.id) {
+                            sintable = true;
+                            sposition = i;
+                            if (playertab[i].monfight == "false") {
+                                shasmon = false;
+                            }
                         }
                     }
-                }
-                if (intable && hasmon) {
-                    newitem = playertab[position].monfight;
-                    message.channel.send(new Discord.MessageEmbed()
-                        .attachFiles(newitem.gif)
-                        .setDescription("The fight continues! " + newitem.name + " is at " + playertab[position].monhealth + "/" + newitem.health)
-                    );
-                } else {
-                    message.channel.send("you have no encounter, please use `:!enc`.");
-                }
-            }
-            if (message.content == ":!enc") {
-                var intable = false;
-                var position = 0;
-                var hasmon = true;
-                for (i = 0; i < playertab.length; i++) {
-                    if (playertab[i].token == message.author.id) {
-                        intable = true;
-                        position = i;
-                        if (playertab[i].monfight == "false") {
-                            hasmon = false;
+                    if (sintable) {
+                        if (shasmon == true) {
+                            messagecurr.channel.send("you already have an encounter.");
+                        } else {
+                            newitem = randtab(monstertable);
+                            playertab[sposition].monfight = newitem;
+                            playertab[sposition].monhealth = newitem.health
+                            playertab[sposition].curract = newitem.requiredact;
+                            messagecurr.channel.send(new Discord.MessageEmbed()
+                                .attachFiles(newitem.gif)
+                                .setDescription("A wild " + newitem.name + " has appeared!")
+                            );
                         }
-                    }
-                }
-                if (intable) {
-                    if (hasmon == true) {
-                        message.channel.send("you already have an encounter.");
                     } else {
                         newitem = randtab(monstertable);
-                        playertab.splice(playertab[position], 1, new player(message.author.id, newitem, newitem.health, playertab[position].exp, playertab[position].Gold, newitem.requiredact, playertab[position].attack));
-                        message.channel.send(new Discord.MessageEmbed()
+                        playertab.insert(0, new player(messagecurr.author.id, newitem, newitem.health, 0, 0, newitem.requiredact, 10));
+                        messagecurr.channel.send(new Discord.MessageEmbed()
                             .attachFiles(newitem.gif)
                             .setDescription("A wild " + newitem.name + " has appeared!")
                         );
                     }
-                } else {
-                    newitem = randtab(monstertable);
-                    playertab.insert(0, new player(message.author.id, newitem, newitem.health, 0, 0, newitem.requiredact, 10));
-                    message.channel.send(new Discord.MessageEmbed()
-                        .attachFiles(newitem.gif)
-                        .setDescription("A wild " + newitem.name + " has appeared!")
-                    );
                 }
             }
+            running = false;
         }
     }
 });
