@@ -1,6 +1,7 @@
 const Discord = require('discord.js');
 const client = new Discord.Client();
 var running = false;
+const expneed = [0,10,30,70,120,200,300,500,800,1200,1700,2500,3500,5000,7000,10000,15000,25000,50000,99999]
 Array.prototype.insert = function ( index, item ) {
     this.splice( index, 0, item );
 };
@@ -11,7 +12,7 @@ client.on("ready", function() {
     client.user.setActivity(":!commands")
   });
 class player {
-    constructor(token, monfight, monhealth, exp, Gold, curract, attack) {
+    constructor(token, monfight, monhealth, exp, Gold, curract, attack, love) {
         this.token = token;
         this.monfight = monfight;
         this.monhealth = monhealth;
@@ -19,6 +20,7 @@ class player {
         this.Gold = Gold;
         this.curract = curract;
         this.attack = attack;
+        this.love = love;
     }
 }
 class Mon {
@@ -143,6 +145,8 @@ client.on('message', message =>{
                             newitem = playertab[position].monfight;
                             playertab[position].monhealth = 0;
                             if (playertab[position].monhealth <= 0) {
+                                playertab[position].exp += playertab[position].monfight.rewarde;
+                                playertab[position].Gold += playertab[position].monfight.rewardg;
                                 if (playertab[position].Gold < 0 || isNaN(playertab[position].Gold) || playertab[position].Gold == undefined) {
                                     playertab[position].Gold = 0;
                                 }
@@ -155,23 +159,22 @@ client.on('message', message =>{
                                 if (playertab[position].Gold > 1000000000000000) {
                                     playertab[position].Gold = 1000000000000000
                                 }
-                                if (playertab[position].exp >= 100) {
-                                    var attackadd = 0;
-                                    while (playertab[position].exp >= 100) {
-                                        playertab[position].exp -= 100;
-                                        attackadd += 5
+                                if (playertab[position].exp >= expneed[playertab[position].love]) {
+                                    while (playertab[position].exp >= expneed[playertab[position].love]) {
+                                        playertab[position].exp -= expneed[playertab[position].love];
+                                        console.log("exp" + playertab[position].exp);
+                                        playertab[position].love += 1
+                                        attackadd = (playertab[position].love*2)+8
                                     }
-                                    playertab[position].attack += attackadd;
+                                    playertab[position].attack = attackadd;
                                     messagecurr.channel.send(new Discord.MessageEmbed()
-                                        .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!" + newline + ":heart: Love up! ATK +" + attackadd)
+                                        .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!" + newline + ":heart: Love up! ATK is now " + attackadd)
                                     );
                                 } else {
                                     messagecurr.channel.send(new Discord.MessageEmbed()
                                         .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!")
                                     );
                                 }
-                                playertab[position].exp += playertab[position].monfight.rewarde;
-                                playertab[position].Gold += playertab[position].monfight.rewardg;
                                 playertab[position].monfight = "false";
                             } else {
                                 messagecurr.channel.send(new Discord.MessageEmbed()
@@ -214,7 +217,6 @@ client.on('message', message =>{
                                 }
                             }
                             if (position > -1) {
-                                console.log(Number(arr[1]))
                                 if (isNaN(Number(arr[1]))) {
                                     messagecurr.channel.send("thats not a real value");
                                 } else {
@@ -265,7 +267,6 @@ client.on('message', message =>{
                                 }
                             }
                             if (position > -1) {
-                                console.log(Number(arr[1]))
                                 if (isNaN(Number(arr[1]))) {
                                     messagecurr.channel.send("thats not a real value");
                                 } else {
@@ -287,7 +288,7 @@ client.on('message', message =>{
                         }
                     }
                     if (messagecurr.content == ":!dcommands") {
-                        messagecurr.channel.send("`:!dfight for instant monster killing." + newline + ":!dspare for sparing monsters without acting." + newline + ":!dexp <amount> <person> to add exp to other people or yourself." + newline + ":!dgold <amount> <person> to add gold to other people or yourself.`");
+                        messagecurr.channel.send("`:!dfight for instant monster killing." + newline + ":!dspare for sparing monsters without acting." + newline + ":!dexp <amount> <person> to add exp to other people or yourself." + newline + ":!dgold <amount> <person> to add gold to other people or yourself." + newline + ":!dreset <player> for resetting a players exp and gold due to hacking or glitches.`");
                     }
                 } else {
                     messagecurr.channel.send("You don't have debug perms.");
@@ -435,6 +436,8 @@ client.on('message', message =>{
                         newitem = playertab[position].monfight;
                         playertab[position].monhealth -= playertab[position].attack + extra();
                         if (playertab[position].monhealth <= 0) {
+                            playertab[position].exp += playertab[position].monfight.rewarde;
+                            playertab[position].Gold += playertab[position].monfight.rewardg;
                             if (playertab[position].Gold < 0 || isNaN(playertab[position].Gold) || playertab[position].Gold == undefined) {
                                 playertab[position].Gold = 0;
                             }
@@ -447,23 +450,22 @@ client.on('message', message =>{
                             if (playertab[position].Gold > 1000000000000000) {
                                 playertab[position].Gold = 1000000000000000
                             }
-                            if (playertab[position].exp >= 100) {
-                                var attackadd = 0;
-                                while (playertab[position].exp >= 100) {
-                                    playertab[position].exp -= 100;
-                                    attackadd += 5
+                            if (playertab[position].exp >= expneed[playertab[position].love]) {
+                                while (playertab[position].exp >= expneed[playertab[position].love]) {
+                                    playertab[position].exp -= expneed[playertab[position].love];
+                                    console.log("exp" + playertab[position].exp);
+                                    playertab[position].love += 1
+                                    attackadd = (playertab[position].love*2)+8
                                 }
-                                playertab[position].attack += attackadd;
+                                playertab[position].attack = attackadd;
                                 messagecurr.channel.send(new Discord.MessageEmbed()
-                                    .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!" + newline + ":heart: Love up! ATK +" + attackadd)
+                                    .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!" + newline + ":heart: Love up! ATK is now " + attackadd)
                                 );
                             } else {
                                 messagecurr.channel.send(new Discord.MessageEmbed()
                                     .setDescription("You win, you monster! You Gained " + playertab[position].monfight.rewarde + " EXP and " + playertab[position].monfight.rewardg + " Gold!")
                                 );
                             }
-                            playertab[position].exp += playertab[position].monfight.rewarde;
-                            playertab[position].Gold += playertab[position].monfight.rewardg;
                             playertab[position].monfight = "false";
                         } else {
                             messagecurr.channel.send(new Discord.MessageEmbed()
@@ -526,7 +528,7 @@ client.on('message', message =>{
                         }
                     } else {
                         newitem = randtab(monstertable);
-                        playertab.insert(0, new player(messagecurr.author.id, newitem, newitem.health, 0, 0, newitem.requiredact, 10));
+                        playertab.insert(0, new player(messagecurr.author.id, newitem, newitem.health, 0, 0, newitem.requiredact, 10, 1));
                         messagecurr.channel.send(new Discord.MessageEmbed()
                             .attachFiles(newitem.gif)
                             .setDescription("A wild " + newitem.name + " has appeared!")
